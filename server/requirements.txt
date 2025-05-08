@@ -10,3 +10,4 @@ sqlalchemy
 asyncpg
 greenlet
 typing_inspect
+httpx
