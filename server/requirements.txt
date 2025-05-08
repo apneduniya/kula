@@ -1,0 +1,12 @@
+python-dotenv
+fastapi
+typing
+fastapi_restful
+python-multipart
+uvicorn
+pydantic_settings
+logging
+sqlalchemy
+asyncpg
+greenlet
+typing_inspect
