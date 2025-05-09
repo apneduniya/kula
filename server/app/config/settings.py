@@ -13,7 +13,7 @@ class Config(BaseSettings):
     # Basic details
     PROJECT_NAME: str = "Kula"
     PROJECT_VERSION: str = "1.0.0"
-    PROJECT_DESCRIPTION: str = ""
+    PROJECT_DESCRIPTION: str = "Futarchy x AI based world simulator"
 
     # Application Configuration
     LOG_LEVEL: str = "INFO"
