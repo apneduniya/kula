@@ -1,2 +1,84 @@
 // this needs to be done by agent wallet, which is server side(privy)
 // so better return the txn IXN
+
+import { NextRequest, NextResponse } from 'next/server';
+import { FutarchyRPCClient, AUTOCRAT_VERSIONS, getMidPrice, SwapPreview, AmmMarket, FutarchyAmmMarketsClient } from "@metadaoproject/futarchy-sdk";
+import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
+import { Connection, PublicKey, TransactionInstruction, clusterApiUrl } from "@solana/web3.js";
+
+export async function POST(req: NextRequest, { params }: { params: { chatId: string } }) {
+  try {
+    const chatId = params.chatId;
+    const body = await req.json();
+    const { userAddress, marketSide, amountInUSDC, agentWalletAddress, passMarketAccount, failMarketAccount } = body;
+
+    if (marketSide == 'YES') {
+        // agent buys X USDC worth of PASS -> GETS relevant amount of YES tokens + X fUSDC
+        // 1. get price of YES to calculate Y(no of YES tokens bought with X USDC)
+        // 2. make the buy IXN + return the txn IXN/signature
+        
+
+        // how to we get the PASS(YES Token) + fUSDC here
+        // also how do we get the price
+        // then SWAP the USDC for YES tokens + transfer some fUSDC from the pool
+        
+        const price = await getMidPrice() // price in USDC per YES token
+        const outputAmountInYESTokens = amountInUSDC/price;
+
+        // getting the apt price quote
+        // const quote = 
+        // const BuyammSwap = SwapType.buy(amountInUSDC, baseQuote)
+
+        const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed")
+        const wallet = { publicKey: new PublicKey(userAddress) } as Wallet
+        const provider = new AnchorProvider(connection, wallet);
+        const programVersion = AUTOCRAT_VERSIONS[0];
+        const client = FutarchyRPCClient.make(provider, undefined);
+
+        const ammClient = new FutarchyAmmMarketsClient(
+          provider, // AnchorProvider
+          /* amm, ammClient, autocratClient, transactionSender */ // fill these as required by your SDK setup
+        );
+
+        // 1. Preview swap
+        const preview = await ammClient.getSwapPreview(passMarketAccount, amountInUSDC, true, 0.01);
+
+        // 2. Execute swap
+        const tx = await ammClient.swap(
+          passMarketAccount,
+          { buy: {} },
+          amountInUSDC,
+          preview.outputUnits,
+          0.01
+        );
+
+    }
+    else if(marketSide == 'NO'){
+        // agent buys X USDC worth of FAIL -> GETS relevant amount of NO tokens + X pUSDC
+        // similar as w YES
+    }
+
+    const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
+    const wallet = { publicKey: new PublicKey(userAddress) } as Wallet;
+    const provider = new AnchorProvider(connection, wallet);
+
+    return NextResponse.json(
+      { 
+        success: true,
+        swapResponse: ,
+        amountofConditionalTokensReceived: ,
+      }, 
+      { status: 200 }
+    );
+    
+  } catch (error) {
+    console.error("Error processing buy order:", error);
+    return NextResponse.json(
+      { 
+        success: false, 
+        message: "Failed to process buy order" 
+      }, 
+      { status: 500 }
+    );
+  }
+}
