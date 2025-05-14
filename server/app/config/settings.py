@@ -30,11 +30,12 @@ class Config(BaseSettings):
     # Database Configuration
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
-    POSTGRES_DB: str = "kula"
+    POSTGRES_DB: str = "postgres"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: str = "5432"
     DATABASE_URL: str = ""
     ASYNC_DATABASE_URL: str = ""
+    DB_ECHO: bool = False
 
     # Other Configurations
     OPENAI_API_KEY: str

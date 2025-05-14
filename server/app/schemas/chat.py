@@ -1,14 +1,14 @@
 import typing as t
+import uuid
+
 from pydantic import BaseModel
 
 
-class RequestSaveMessage(BaseModel):
-    chat_id: int
+class RequestCreateNewChat(BaseModel):
     user_id: int
-    username: t.Optional[str] = None
-    message_id: int
-    message_content: str
-    chat_type: str
-    media: t.Optional[str] = None
+    title: str
+
+class ResponseCreateNewChat(BaseModel):
+    chat_id: uuid.UUID
 
 

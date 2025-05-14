@@ -2,12 +2,11 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, List, Optional, Any
 
 from sqlalchemy import select, delete, func
-from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import NoResultFound
 
 from app.models.core.base import BaseOrm
 from app.schemas.core.pageable import PageRequestSchema
-from app.repository.core.session import get_db_session
+from app.repositories.core.session import get_db_session
 
 
 T = TypeVar('T', bound=BaseOrm)
@@ -85,21 +84,7 @@ class GenericRepository(BaseRepository[T]):
         :return: The entity with the given ID, or None if not found.
         """
         async with get_db_session() as session:
-            # Get all relationships that need to be loaded
-            relationships = [rel.key for rel in self._model.__mapper__.relationships]
-            
-            # Build the query with appropriate loading strategies
             query = select(self._model).filter_by(id=id)
-            for rel in relationships:
-                # Use joinedload for one-to-one or many-to-one
-                # Use selectinload for one-to-many or many-to-many
-                if rel in self._model.__mapper__.relationships:
-                    rel_obj = self._model.__mapper__.relationships[rel]
-                    if rel_obj.direction.name in ['ONETOMANY', 'MANYTOMANY']:
-                        query = query.options(selectinload(getattr(self._model, rel)))
-                    else:
-                        query = query.options(joinedload(getattr(self._model, rel)))
-            
             result = await session.execute(query)
             return result.scalar_one_or_none()
 
@@ -124,19 +109,7 @@ class GenericRepository(BaseRepository[T]):
         :return: A list of entities with the given IDs.
         """
         async with get_db_session() as session:
-            # Get all relationships that need to be loaded
-            relationships = [rel.key for rel in self._model.__mapper__.relationships]
-            
-            # Build the query with appropriate loading strategies
             query = select(self._model).filter(self._model.id.in_(ids))
-            for rel in relationships:
-                if rel in self._model.__mapper__.relationships:
-                    rel_obj = self._model.__mapper__.relationships[rel]
-                    if rel_obj.direction.name in ['ONETOMANY', 'MANYTOMANY']:
-                        query = query.options(selectinload(getattr(self._model, rel)))
-                    else:
-                        query = query.options(joinedload(getattr(self._model, rel)))
-            
             result = await session.execute(query)
             return result.scalars().all()
 
@@ -147,18 +120,18 @@ class GenericRepository(BaseRepository[T]):
         :param pageable: The pagination and sorting information.
         :param params: The filter parameters.
         :return: A tuple containing the list of entities and the total count.
+
+        Example:
+            >>> repo = GenericRepository(UserOrm)
+            >>> items, total = await repo.get_paged_items(PageRequestSchema(page=1, size=10), {})
         """
         async with get_db_session() as session:
             # Get total count
             count_query = select(func.count()).select_from(self._model).filter_by(**params)
             total_count = (await session.execute(count_query)).scalar()
 
-            # Get paginated results with relationships
+            data = []
             if total_count > 0:
-                # Get all relationships that need to be loaded
-                relationships = [rel.key for rel in self._model.__mapper__.relationships]
-                
-                # Build the query with appropriate loading strategies
                 sort_column = getattr(self._model, pageable.sort)
                 query = (
                     select(self._model)
@@ -167,19 +140,7 @@ class GenericRepository(BaseRepository[T]):
                     .limit(pageable.size)
                     .offset(pageable.offset)
                 )
-                
-                # Add loading strategies for relationships
-                for rel in relationships:
-                    if rel in self._model.__mapper__.relationships:
-                        rel_obj = self._model.__mapper__.relationships[rel]
-                        if rel_obj.direction.name in ['ONETOMANY', 'MANYTOMANY']:
-                            query = query.options(selectinload(getattr(self._model, rel)))
-                        else:
-                            query = query.options(joinedload(getattr(self._model, rel)))
-                
                 result = await session.execute(query)
                 data = result.scalars().all()
-            else:
-                data = []
 
             return data, total_count

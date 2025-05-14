@@ -3,8 +3,8 @@ import typing as t
 from sqlalchemy import or_, select
 from sqlalchemy.exc import NoResultFound
 
-from app.repository.core.repository import GenericRepository
-from app.repository.core.session import get_db_session
+from app.repositories.core.base import GenericRepository
+from app.repositories.core.session import get_db_session
 from app.schemas.core.pageable import PageRequestSchema
 
 from app.models.repository.message import MessageOrm
@@ -23,4 +23,3 @@ class MessageRepository(GenericRepository[MessageOrm]):
     """
     def __init__(self):
         super().__init__(MessageOrm)
-

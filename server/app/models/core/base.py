@@ -1,9 +1,11 @@
 from datetime import datetime
+import uuid
 
 import sqlalchemy as sa
-from sqlalchemy import Column, DateTime, BigInteger
+from sqlalchemy import Column, DateTime
 from sqlalchemy import MetaData
 from sqlalchemy.orm import declarative_base
+from sqlalchemy.dialects.postgresql import UUID
 
 
 """
@@ -30,7 +32,7 @@ class BaseOrm(Base):
     __abstract__ = True
     __table_args__ = {"extend_existing": True}
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False)
     updated_at = Column(
         DateTime(timezone=True),

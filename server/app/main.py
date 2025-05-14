@@ -10,6 +10,8 @@ from app.config import exception_config as exh
 from app.config.settings import config
 from app.core.logging import logger
 
+from app.controllers.chat import chat_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,7 +44,8 @@ def create_application() -> FastAPI:
     )
 
     logger.info("Adding exception handlers...")
-    #  I N C L U D E   E X C E P T I O N S  H A N D L E R S
+
+    #  I N C L U D E   E X C E P T I O N S   H A N D L E R S
 
     app.add_exception_handler(RequestValidationError, exh.req_validation_handler)
     app.add_exception_handler(ValidationError, exh.validation_handler)
@@ -51,8 +54,11 @@ def create_application() -> FastAPI:
     app.add_exception_handler(HTTPError, exh.http_error_handler)
     app.add_exception_handler(HTTPException, exh.http_exception_handler)
 
-    # logger.info("Including routers...")
-    # TODO: Include routers
+    logger.info("Including routers...")
+
+    #  I N C L U D E   R O U T E R S
+
+    app.include_router(chat_router, prefix="/chat", tags=["chat"])
 
     logger.info("Application setup complete")
     return app
