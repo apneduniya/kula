@@ -10,12 +10,20 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
+    "@langchain/community": "^0.3.42",
+    "@langchain/langgraph": "^0.2.72",
     "@metadaoproject/futarchy-sdk": "^4.0.0-alpha.54",
+    "@prisma/client": "^6.7.0",
+    "@privy-io/server-auth": "^1.22.0",
     "@solana/spl-token": "^0.4.13",
     "@solana/web3.js": "^1.98.2",
+    "@types/uuid": "^10.0.0",
+    "langchain": "^0.3.24",
     "next": "15.3.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "recharts": "^2.15.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -17,11 +17,6 @@ export async function POST(req: NextRequest, { params }: { params: { chatId: str
         // 1. get price of YES to calculate Y(no of YES tokens bought with X USDC)
         // 2. make the buy IXN + return the txn IXN/signature
         
-
-        // how to we get the PASS(YES Token) + fUSDC here
-        // also how do we get the price
-        // then SWAP the USDC for YES tokens + transfer some fUSDC from the pool
-        
         const price = await getMidPrice() // price in USDC per YES token
         const outputAmountInYESTokens = amountInUSDC/price;
 
@@ -35,15 +30,14 @@ export async function POST(req: NextRequest, { params }: { params: { chatId: str
         const programVersion = AUTOCRAT_VERSIONS[0];
         const client = FutarchyRPCClient.make(provider, undefined);
 
-        const ammClient = new FutarchyAmmMarketsClient(
-          provider, // AnchorProvider
-          /* amm, ammClient, autocratClient, transactionSender */ // fill these as required by your SDK setup
+        const ammClient = FutarchyAmmMarketsClient(
+          provider,
+          connection,
+          client
         );
 
-        // 1. Preview swap
         const preview = await ammClient.getSwapPreview(passMarketAccount, amountInUSDC, true, 0.01);
 
-        // 2. Execute swap
         const tx = await ammClient.swap(
           passMarketAccount,
           { buy: {} },
@@ -51,20 +45,17 @@ export async function POST(req: NextRequest, { params }: { params: { chatId: str
           preview.outputUnits,
           0.01
         );
+        const quote = 
 
     }
     else if(marketSide == 'NO'){
         // agent buys X USDC worth of FAIL -> GETS relevant amount of NO tokens + X pUSDC
         // similar as w YES
     }
-
-    const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
-    const wallet = { publicKey: new PublicKey(userAddress) } as Wallet;
-    const provider = new AnchorProvider(connection, wallet);
-
     return NextResponse.json(
       { 
         success: true,
+        txSignature: tx,
         swapResponse: ,
         amountofConditionalTokensReceived: ,
       }, 
