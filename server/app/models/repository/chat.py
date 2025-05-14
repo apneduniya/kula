@@ -18,9 +18,8 @@ from app.models.core.base import BaseOrm
 class ChatOrm(BaseOrm):
     __tablename__ = "chats"
 
-    chat_id = Column(BigInteger, primary_key=True, index=True)
+    title = Column(String, nullable=False)
     user_id = Column(BigInteger, nullable=False, index=True)
-    timestamp = Column(DateTime(timezone=True), default=lambda: datetime.datetime.now(datetime.timezone.utc), nullable=False)
 
     messages = relationship("MessageOrm", back_populates="chat")
 

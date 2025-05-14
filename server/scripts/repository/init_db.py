@@ -6,6 +6,10 @@ from app.config.settings import config
 from app.core.logging import logger
 from app.models.core.base import BaseOrm
 
+# Import all models to ensure they are registered with the metadata
+from app.models.repository.chat import ChatOrm
+from app.models.repository.message import MessageOrm
+
 
 async def init_db():
     """
@@ -41,7 +45,8 @@ async def init_db():
     # Create engine with connection pooling and health checks
     engine = create_async_engine(
         config.get_async_database_url(),
-        pool_pre_ping=True
+        pool_pre_ping=True,
+        echo=config.DB_ECHO
     )
 
     # Drop all existing tables to ensure clean state
@@ -51,6 +56,7 @@ async def init_db():
 
     # Create all tables based on current model definitions
     async with engine.begin() as conn:
+        logger.info(f"Tables to be created: {BaseOrm.metadata.tables.keys()}")
         await conn.run_sync(BaseOrm.metadata.create_all)
         logger.info("Created all tables")
 

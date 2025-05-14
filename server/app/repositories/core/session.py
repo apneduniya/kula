@@ -9,6 +9,7 @@ from app.config.settings import config
 async_url = config.get_async_database_url()
 engine = create_async_engine(
     async_url,
+    echo=config.DB_ECHO,
     pool_pre_ping=True,
     poolclass=AsyncAdaptedQueuePool,
     pool_size=5,

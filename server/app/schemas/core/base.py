@@ -1,10 +1,12 @@
 from datetime import datetime
 import typing as t  
-
+import uuid
 from pydantic import BaseModel
 from pydantic import Field
 from app.models.core.base import BaseOrm
 
+
+T = t.TypeVar('T')
 
 class BaseSchema(BaseModel):
     __orm__ = None
@@ -12,7 +14,7 @@ class BaseSchema(BaseModel):
     class Config:
         from_attributes = True
 
-    id: t.Optional[int] = Field(default=None, read_only=True)
+    id: t.Optional[uuid.UUID] = Field(default=None, read_only=True)
     created_at: t.Optional[datetime] = Field(default_factory=datetime.utcnow)
     updated_at: t.Optional[datetime] = Field(default_factory=datetime.utcnow)
 
@@ -48,3 +50,14 @@ class BaseSchema(BaseModel):
         set_val(None, self)
 
         return orm
+    
+
+class BackendAPIResponse(BaseModel, t.Generic[T]):
+    """
+    Generic API response model for backend
+    """
+    success: bool
+    message: t.Optional[str] = None
+    data: t.Optional[T] = None
+    error: t.Optional[str] = None
+
