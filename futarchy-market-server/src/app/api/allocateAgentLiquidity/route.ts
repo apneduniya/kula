@@ -40,7 +40,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { userAddress, userLiquidityAmount, chatId } = body;
 
-    // Input validation
     if (!chatId) {
       return NextResponse.json(
         { success: false, message: "Chat ID is required" },

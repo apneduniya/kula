@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model decision {
+  id         Int      @id @default(autoincrement())
+  title      String?
+  isResolved Boolean?
+  passPrice  Float?
+  failPrice  Float?
+  chatId     Int?
+}
+
+model chat {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime? @db.Date
+}
