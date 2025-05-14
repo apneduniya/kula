@@ -41,6 +41,7 @@ const staticResolvedData = {
 
 const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMessage }) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [qs, setQs] = useState('')
   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
   const [cardState, setCardState] = useState<'creation' | 'unresolved' | 'resolved' | null>(null);
   const [showUsdcPopup, setShowUsdcPopup] = useState(false);
@@ -162,6 +163,103 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Client-side function to extract a decision question
+  const extractDecisionQuestion = (userInput: string): Promise<string> => {
+    return new Promise(async (resolve) => {
+      try {
+        if (!userInput) {
+          resolve("Should this decision be approved?");
+          return;
+        }
+
+        // Regular expressions for common patterns
+        const isAlreadyQuestion = /^(?:should|will|is|are|can|could|would|do|does|has|have|had|may|might|must|shall|was|were)\b.+\?$/i.test(userInput.trim());
+        
+        if (isAlreadyQuestion) {
+          // If it's already formatted as a question, just return it
+          resolve(userInput.trim());
+          return;
+        }
+
+        // Check if there's a question API key available
+        if (process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
+          try {
+            // Try to use OpenAI to extract a better question
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`
+              },
+              body: JSON.stringify({
+                model: "gpt-4o",
+                messages: [
+                  {
+                    role: "system",
+                    content: `Extract a clear, concise decision question from the user input. Follow these rules:
+                    1. The question should be formatted as one that can be answered with yes/no or should/should not
+                    2. Make it simple, direct, and suitable for a prediction market
+                    3. Start with "Should", "Will", "Is", or similar question words when appropriate
+                    4. Remove any expressions of confusion or uncertainty
+                    5. If the input is already a clear decision question, preserve its original form
+                    6. The question must end with a question mark
+                    7. Keep the question under 15 words if possible
+                    8. Only return the question itself, no explanation or additional text`
+                  },
+                  {
+                    role: "user",
+                    content: userInput
+                  }
+                ],
+                temperature: 0.3,
+                max_tokens: 60
+              })
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              const extractedQuestion = data.choices[0].message.content.trim();
+              
+              if (extractedQuestion && extractedQuestion.length > 3) {
+                resolve(extractedQuestion);
+                return;
+              }
+            }
+          } catch (error) {
+            console.error('Error in OpenAI question extraction:', error);
+            // Fall through to the fallback method
+          }
+        }
+        
+        // Fallback method if API call fails or no API key
+        // Basic logic to transform text to a question
+        let question = userInput.trim();
+        
+        // // Remove expressions of confusion or uncertainty
+        // question = question.replace(/^(?:i am|am|i'm|i am being|being|i feel|feeling|i'm feeling|i am feeling) (?:confused|uncertain|not sure|unsure|wondering|thinking|unclear|ambivalent) (?:about|whether|if|on|regarding|concerning)/i, '');
+        
+        // // Clean up any leftover artifacts
+        // question = question.replace(/^(or not|or no)/, '').trim();
+        
+        // // If it doesn't start with a question word, add "Should"
+        // if (!/^(?:should|will|is|are|can|could|would|do|does|has|have|had|may|might|must|shall|was|were)\b/i.test(question)) {
+        //   question = "Should " + question;
+        // }
+        
+        // Ensure it ends with a question mark
+        if (!question.endsWith('?')) {
+          question += '?';
+        }
+        
+        resolve(question);
+      } catch (error) {
+        console.error('Error extracting question:', error);
+        // Ultimate fallback
+        resolve(userInput.trim().endsWith('?') ? userInput.trim() : `Should ${userInput.trim()}?`);
+      }
+    });
+  };
+
   const handleSendMessage = async (content: string) => {
     const newMessage: Message = {
       id: uuidv4(),
@@ -176,19 +274,20 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
       onSendMessage(content);
     }
     
-    // Assume any message is a question to create a new prediction market
-    setCurrentQuestion(content);
+    // Extract a clean decision question from the user input
+    const extractedQuestion = await extractDecisionQuestion(content);
+    setCurrentQuestion(extractedQuestion);
     setCardState('creation');
 
     try {
-      // Create a new decision using the API route
+      // Create a new decision using the API route with the extracted question
       const response = await fetch('/api/decision', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          title: content,
+          title: extractedQuestion,
           chatId: chatId
         }),
       });
@@ -211,7 +310,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
           timestamp: new Date(),
           cardData: {
             state: 'creation',
-            question: content,
+            question: extractedQuestion,
           }
         };
         setMessages((prev) => [...prev, systemResponse]);
@@ -228,7 +327,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
           timestamp: new Date(),
           cardData: {
             state: 'creation',
-            question: content,
+            question: extractedQuestion,
           }
         };
         setMessages((prev) => [...prev, systemResponse]);
@@ -266,6 +365,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
     try {
       // Call the function and update the card state when done
       await provideLiquidityAndCreateAgents(usdcAmount, currentQuestion || '');
+      
       
       // Update the decision using the API route
       if (currentDecisionId) {
@@ -354,7 +454,6 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
 
   const handleResolveMarket = async () => {
     try {
-      // Update the decision using the API route
       if (currentDecisionId) {
         const response = await fetch('/api/decision', {
           method: 'PUT',
@@ -458,6 +557,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
                   onAddUsdc={handleAddUsdc}
                   onAddAgents={handleAddAgents}
                   onAddLiquidity={handleAddLiquidity}
+                  onResolveMarket={handleResolveMarket}
                   onRedeemTokens={handleRedeemTokens}
                 />
               ) : null
@@ -508,4 +608,4 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
   );
 };
 
-export default Chat; 
+export default Chat;

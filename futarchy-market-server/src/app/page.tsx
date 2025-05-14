@@ -112,12 +112,10 @@ export default function Home() {
     }
   };
 
-  // Switch to a specific chat
   const switchToChat = (chatId: string | number) => {
     setCurrentChatId(chatId);
   };
 
-  // Format the date for display (e.g., "2 days ago")
   const getTimeAgo = (date: Date) => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - new Date(date).getTime());
