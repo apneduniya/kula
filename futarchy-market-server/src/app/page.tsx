@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Chat from './components/chat';
+import Chat from '../components/chat';
 import { v4 as uuidv4 } from 'uuid';
+import WalletButton from '../components/wallet-connect-button';
 
 // Define the type for a decision
 interface Decision {
@@ -133,8 +134,11 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <header className="bg-black text-white p-4 border-b border-gray-800 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">Kula</h1>
+          <div className="flex items-center space-x-4">
+            <WalletButton />
+          </div>
         </div>
       </header>
       

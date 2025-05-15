@@ -24,3 +24,90 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
+
+/* Wallet Button Styles */
+.wallet-adapter-button {
+  background-color: #1a1a1a !important;
+  height: 40px !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  border-radius: 6px !important;
+  color: white !important;
+  font-weight: 500 !important;
+  border: 1px solid #333 !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+}
+
+.wallet-adapter-button:hover {
+  background-color: #333 !important;
+  border-color: #444 !important;
+}
+
+.wallet-adapter-button:active {
+  background-color: #444 !important;
+}
+
+/* Modal Styles */
+.wallet-adapter-modal-wrapper {
+  background-color: #1a1a1a !important;
+  border: 1px solid #333 !important;
+  border-radius: 12px !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background-color: #333 !important;
+}
+
+.wallet-adapter-modal-title {
+  color: white !important;
+}
+
+.wallet-adapter-modal-list {
+  margin: 0 0 4px !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button {
+  border-radius: 4px !important;
+  font-weight: 400 !important;
+  margin: 4px 0 !important;
+  width: 100% !important;
+  background-color: #262626 !important;
+  border: 1px solid #333 !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background-color: #333 !important;
+}
+
+/* Dropdown Menu Styles */
+.wallet-adapter-dropdown {
+  position: relative !important;
+}
+
+.wallet-adapter-dropdown-list {
+  background: #1a1a1a !important;
+  border: 1px solid #333 !important;
+  border-radius: 8px !important;
+  padding: 4px !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 100% !important;
+  margin-top: 4px !important;
+  min-width: 200px !important;
+}
+
+.wallet-adapter-dropdown-list-item {
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  color: white !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  border-radius: 4px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.wallet-adapter-dropdown-list-item:hover {
+  background-color: #333 !important;
+}

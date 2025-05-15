@@ -15,9 +15,21 @@ model decision {
   passPrice  Float?
   failPrice  Float?
   chatId     Int?
+  agents     agent[]
 }
 
 model chat {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime? @db.Date
+  agents    agent[]
+}
+
+model agent {
+  id               Int        @id @default(autoincrement())
+  walletAddress    String?
+  personality      String?
+  encryptedKeypair String?
+  chatId           Int
+  chat             chat       @relation(fields: [chatId], references: [id])
+  decisions        decision[]
 }

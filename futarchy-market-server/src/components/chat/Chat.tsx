@@ -305,7 +305,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
       setTimeout(() => {
         const systemResponse: Message = {
           id: uuidv4(),
-          content: 'I\'ve created a new prediction market based on your question.',
+          content: 'I\'ve created a new decision market based on your question.',
           sender: 'system',
           timestamp: new Date(),
           cardData: {
@@ -570,6 +570,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
         <ChatInput onSendMessage={handleSendMessage} />
       </div>
 
+        {/* UPON CLICKING ON ADD USDC -> txn = (proposal creation ixn(/api/proposal/new, which also creates 100 Agents) + USDC transfer to each of the agent wallets IXN) */}
       {/* USDC Popup */}
       {showUsdcPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">

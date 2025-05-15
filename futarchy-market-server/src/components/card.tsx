@@ -21,6 +21,7 @@ type CardProps = {
   onAddAgents?: () => void;
   onAddLiquidity?: () => void;
   onRedeemTokens?: () => void;
+  onResolveMarket?: () => void;
 };
 
 export default function Card({

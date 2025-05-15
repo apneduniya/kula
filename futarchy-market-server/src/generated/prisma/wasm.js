@@ -134,6 +134,14 @@ exports.Prisma.ChatScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.AgentScalarFieldEnum = {
+  id: 'id',
+  walletAddress: 'walletAddress',
+  personality: 'personality',
+  encryptedKeypair: 'encryptedKeypair',
+  chatId: 'chatId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -152,7 +160,8 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   decision: 'decision',
-  chat: 'chat'
+  chat: 'chat',
+  agent: 'agent'
 };
 
 /**
