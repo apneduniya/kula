@@ -39,14 +39,14 @@ export default function Card({
   onRedeemTokens,
 }: CardProps) {
   return (
-    <div className="relative rounded-3xl bg-black text-white overflow-hidden p-8 max-w-xl mx-auto">
-      <h2 className="text-4xl font-bold text-center mb-8">{question}</h2>
+    <div className="relative rounded-xl bg-gray-900 text-white overflow-hidden p-6 w-full mx-auto border border-gray-800 shadow-lg">
+      <h2 className="text-xl font-medium text-center mb-6">{question}</h2>
 
       {state === 'creation' && (
         <div className="flex justify-center">
           <button 
             onClick={onAddUsdc}
-            className="px-6 py-3 bg-pink-300 text-black font-bold rounded-full text-xl hover:bg-pink-400 transition-colors cursor-pointer"
+            className="px-5 py-2 bg-pink-500 text-white font-medium rounded-md text-sm hover:bg-pink-600 transition-colors cursor-pointer"
           >
             Add USDC
           </button>
@@ -55,31 +55,31 @@ export default function Card({
 
       {state === 'unresolved' && (
         <>
-          <div className="mb-8">
+          <div className="mb-6">
             <div className="flex items-center mb-2">
-              <div className="w-4 h-4 bg-white mr-2"></div>
-              <span className="mr-2">${currentPrice?.toFixed(2)}</span>
-              <span className="text-gray-400">Price</span>
+              <div className="w-3 h-3 bg-white mr-2 rounded-full"></div>
+              <span className="mr-2 text-sm">${currentPrice?.toFixed(2)}</span>
+              <span className="text-xs text-gray-400">Price</span>
             </div>
             <div className="flex items-center mb-2">
-              <div className="w-4 h-4 bg-green-500 mr-2"></div>
-              <span className="mr-2">${ifApprovedPrice?.toFixed(2)}</span>
-              <span className="text-gray-400">If Approved</span>
+              <div className="w-3 h-3 bg-green-500 mr-2 rounded-full"></div>
+              <span className="mr-2 text-sm">${ifApprovedPrice?.toFixed(2)}</span>
+              <span className="text-xs text-gray-400">If Approved</span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-red-500 mr-2"></div>
-              <span className="mr-2">${ifRejectedPrice?.toFixed(2)}</span>
-              <span className="text-gray-400">If Rejected</span>
+              <div className="w-3 h-3 bg-red-500 mr-2 rounded-full"></div>
+              <span className="mr-2 text-sm">${ifRejectedPrice?.toFixed(2)}</span>
+              <span className="text-xs text-gray-400">If Rejected</span>
             </div>
           </div>
 
-          <div className="h-64 mb-8">
+          <div className="h-48 mb-6">
             {chartData.length > 0 && (
               <LineChart
-                width={500}
-                height={250}
+                width={400}
+                height={180}
                 data={chartData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
               >
                 <YAxis />
                 <Tooltip />
@@ -109,16 +109,16 @@ export default function Card({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={onAddAgents}
-              className="px-6 py-3 bg-pink-300 text-black font-bold rounded-full text-xl hover:bg-pink-400 transition-colors cursor-pointer"
+              className="px-4 py-2 bg-pink-500 text-white font-medium rounded-md text-sm hover:bg-pink-600 transition-colors cursor-pointer"
             >
               Add Agents
             </button>
             <button 
               onClick={onAddLiquidity}
-              className="px-6 py-3 bg-pink-300 text-black font-bold rounded-full text-xl hover:bg-pink-400 transition-colors cursor-pointer"
+              className="px-4 py-2 bg-pink-500 text-white font-medium rounded-md text-sm hover:bg-pink-600 transition-colors cursor-pointer"
             >
               Add Liquidity
             </button>
@@ -128,25 +128,25 @@ export default function Card({
 
       {state === 'resolved' && (
         <>
-          <div className="flex justify-center mb-8">
-            <button className="px-16 py-4 bg-green-400 text-white font-bold rounded-full text-5xl cursor-default">
+          <div className="flex justify-center mb-6">
+            <button className="px-12 py-3 bg-green-500 text-white font-medium rounded-md text-2xl cursor-default">
               YES
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 mb-8">
+          <div className="grid grid-cols-2 gap-6 mb-6">
             <div className="flex items-center">
-              <div className="w-6 h-6 bg-green-500 mr-3"></div>
+              <div className="w-4 h-4 bg-green-500 mr-2 rounded-full"></div>
               <div>
-                <span className="text-2xl font-bold">${yesPrice?.toFixed(3)}</span>
-                <span className="ml-3 text-2xl text-green-500">YES</span>
+                <span className="text-lg font-medium">${yesPrice?.toFixed(3)}</span>
+                <span className="ml-2 text-green-500 text-sm">YES</span>
               </div>
             </div>
             <div className="flex items-center">
-              <div className="w-6 h-6 bg-red-500 mr-3"></div>
+              <div className="w-4 h-4 bg-red-500 mr-2 rounded-full"></div>
               <div>
-                <span className="text-2xl font-bold">${noPrice?.toFixed(3)}</span>
-                <span className="ml-3 text-2xl text-red-500">NO</span>
+                <span className="text-lg font-medium">${noPrice?.toFixed(3)}</span>
+                <span className="ml-2 text-red-500 text-sm">NO</span>
               </div>
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function Card({
           <div className="flex justify-center">
             <button 
               onClick={onRedeemTokens}
-              className="px-6 py-3 bg-pink-300 text-black font-bold rounded-full text-xl hover:bg-pink-400 transition-colors cursor-pointer"
+              className="px-4 py-2 bg-pink-500 text-white font-medium rounded-md text-sm hover:bg-pink-600 transition-colors cursor-pointer"
             >
               Redeem Tokens
             </button>

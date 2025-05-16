@@ -9,7 +9,7 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ 
   onSendMessage, 
-  placeholder = "What decision do you wanna finalize on?" 
+  placeholder = "What decision do you want to finalize?" 
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -29,7 +29,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className={`flex items-center w-full p-1 border border-gray-700 rounded-lg ${isFocused ? 'border-pink-400' : 'border-gray-700'}`}>
+    <div className={`flex items-center w-full p-1 border ${isFocused ? 'border-pink-500' : 'border-gray-700'} rounded-md bg-gray-800 transition-colors`}>
       <input
         type="text"
         value={message}
@@ -38,13 +38,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         placeholder={placeholder}
-        className="flex-grow px-4 py-2 bg-transparent text-white outline-none placeholder-gray-500"
+        className="flex-grow px-3 py-2 bg-transparent text-white outline-none placeholder-gray-500 text-sm"
       />
       <button 
         onClick={handleSubmit}
-        className="flex items-center justify-center w-10 h-10 text-white bg-black rounded-md hover:bg-gray-800 active:bg-pink-500 transition-colors ml-1 cursor-pointer"
+        className="flex items-center justify-center w-8 h-8 text-white bg-pink-500 rounded-md hover:bg-pink-600 active:bg-pink-700 transition-colors ml-1 cursor-pointer"
+        disabled={!message.trim()}
       >
-        <span className="text-xl font-bold">→</span>
+        <span className="text-sm">→</span>
       </button>
     </div>
   );

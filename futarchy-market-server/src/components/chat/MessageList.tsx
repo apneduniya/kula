@@ -35,20 +35,20 @@ const MessageList: React.FC<MessageListProps> = ({ messages, renderCard }) => {
   }
   
   return (
-    <div className="flex flex-col space-y-6 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+    <div className="flex flex-col space-y-4 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
       {messages.map((message) => (
         <div key={message.id} className="flex flex-col">
           {/* Regular message bubble */}
           <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div 
-              className={`max-w-md p-3 rounded-md ${
+              className={`max-w-md p-2.5 rounded-lg ${
                 message.sender === 'user' 
                   ? 'bg-pink-500 text-white' 
                   : 'bg-gray-800 text-white border border-gray-700'
               }`}
             >
-              <p className="text-sm">{message.content}</p>
-              <span className="text-xs text-gray-300 block mt-1">
+              <p className="text-sm font-normal">{message.content}</p>
+              <span className="text-xs text-gray-300 block mt-1 opacity-75">
                 {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
@@ -56,7 +56,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, renderCard }) => {
           
           {/* Card as a separate component centered below the message */}
           {message.cardData && renderCard && (
-            <div className="mt-6 self-center">
+            <div className="mt-4 self-center w-full max-w-md">
               {renderCard(message)}
             </div>
           )}

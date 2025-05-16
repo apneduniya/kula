@@ -149,13 +149,13 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
   const getSystemMessageForState = (state: 'creation' | 'unresolved' | 'resolved') => {
     switch (state) {
       case 'creation':
-        return "I've created a new prediction market based on your question.";
+        return "I've created a new decision market based on your question.";
       case 'unresolved':
         return "Market created successfully!";
       case 'resolved':
         return "The market has been resolved!";
       default:
-        return "I've created a new prediction market based on your question.";
+        return "I've created a new decision market based on your question.";
     }
   };
 
@@ -198,7 +198,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
                     role: "system",
                     content: `Extract a clear, concise decision question from the user input. Follow these rules:
                     1. The question should be formatted as one that can be answered with yes/no or should/should not
-                    2. Make it simple, direct, and suitable for a prediction market
+                    2. Make it simple, direct, and suitable for a decision market
                     3. Start with "Should", "Will", "Is", or similar question words when appropriate
                     4. Remove any expressions of confusion or uncertainty
                     5. If the input is already a clear decision question, preserve its original form
@@ -322,7 +322,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
       setTimeout(() => {
         const systemResponse: Message = {
           id: uuidv4(),
-          content: 'I\'ve created a new prediction market based on your question.',
+          content: 'I\'ve created a new decision market based on your question.',
           sender: 'system',
           timestamp: new Date(),
           cardData: {
@@ -524,21 +524,21 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
 
   return (
     <div className={`flex flex-col h-full bg-gray-900 ${className}`}>
-      <div className="flex items-center justify-between border-b border-gray-800 p-4">
-        <h2 className="text-xl font-bold text-white">Futarchy Chat</h2>
+      <div className="flex items-center justify-between border-b border-gray-800 p-3">
+        <h2 className="text-lg font-medium text-white">Futarchy Chat</h2>
         <button 
           onClick={onNewChat}
-          className="flex items-center justify-center w-8 h-8 text-white bg-gray-800 rounded-md hover:bg-pink-500 transition-colors cursor-pointer"
+          className="flex items-center justify-center w-7 h-7 text-white bg-gray-800 rounded-md hover:bg-pink-500 transition-colors cursor-pointer"
           title="Create new chat"
         >
-          <span className="text-xl font-bold">+</span>
+          <span className="text-sm font-medium">+</span>
         </button>
       </div>
       
       <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
         {loading ? (
           <div className="flex justify-center items-center h-full">
-            <div className="text-white">Loading chat...</div>
+            <div className="text-white text-sm">Loading chat...</div>
           </div>
         ) : (
           <MessageList 
@@ -566,21 +566,20 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-3 border-t border-gray-800">
         <ChatInput onSendMessage={handleSendMessage} />
       </div>
 
-        {/* UPON CLICKING ON ADD USDC -> txn = (proposal creation ixn(/api/proposal/new, which also creates 100 Agents) + USDC transfer to each of the agent wallets IXN) */}
       {/* USDC Popup */}
       {showUsdcPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-lg p-6 w-96 max-w-full border border-gray-700">
-            <h3 className="text-xl font-bold mb-4 text-white">Add USDC</h3>
+          <div className="bg-gray-900 rounded-lg p-5 w-80 max-w-full border border-gray-700 shadow-lg">
+            <h3 className="text-lg font-medium mb-3 text-white">Add USDC</h3>
             <div className="mb-4">
-              <label className="block text-gray-300 mb-2">Enter USDC amount:</label>
+              <label className="block text-gray-300 mb-2 text-sm">How much USDC worth of liquidity do you want to add?</label>
               <input
                 type="number"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:border-pink-400 text-white"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:border-pink-500 text-white text-sm"
                 value={usdcAmount}
                 onChange={(e) => setUsdcAmount(e.target.value)}
                 placeholder="0.00"
@@ -588,18 +587,18 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
               />
             </div>
             <div className="flex justify-end space-x-2">
-              <button
-                className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 cursor-pointer"
+              {/* <button
+                className="px-3 py-1.5 bg-gray-800 text-white text-sm rounded-md hover:bg-gray-700 cursor-pointer"
                 onClick={() => setShowUsdcPopup(false)}
               >
                 Cancel
-              </button>
+              </button> */}
               <button
-                className="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 active:bg-pink-700 cursor-pointer"
+                className="px-3 py-1.5 bg-pink-500 text-white text-sm rounded-md hover:bg-pink-600 active:bg-pink-700 cursor-pointer"
                 onClick={handleSubmitUsdc}
                 disabled={!usdcAmount || parseFloat(usdcAmount) <= 0}
               >
-                Add
+                Create Proposal and Initialize Market
               </button>
             </div>
           </div>
