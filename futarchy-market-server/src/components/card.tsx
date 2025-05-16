@@ -39,14 +39,14 @@ export default function Card({
   onRedeemTokens,
 }: CardProps) {
   return (
-    <div className="relative rounded-xl bg-gray-900 text-white overflow-hidden p-6 w-full mx-auto border border-gray-800 shadow-lg">
+    <div className="relative rounded-xl bg-black text-white overflow-hidden p-6 w-full mx-auto border border-zinc-800 shadow-lg">
       <h2 className="text-xl font-medium text-center mb-6">{question}</h2>
 
       {state === 'creation' && (
         <div className="flex justify-center">
           <button 
             onClick={onAddUsdc}
-            className="px-5 py-2 bg-pink-500 text-white font-medium rounded-md text-sm hover:bg-pink-600 transition-colors cursor-pointer"
+            className="px-5 py-2 bg-[#FF9EC5] text-black font-medium rounded-md text-sm hover:bg-[#FF9EC5]/90 transition-colors cursor-pointer"
           >
             Add USDC
           </button>
@@ -59,17 +59,17 @@ export default function Card({
             <div className="flex items-center mb-2">
               <div className="w-3 h-3 bg-white mr-2 rounded-full"></div>
               <span className="mr-2 text-sm">${currentPrice?.toFixed(2)}</span>
-              <span className="text-xs text-gray-400">Price</span>
+              <span className="text-xs text-zinc-400">Price</span>
             </div>
             <div className="flex items-center mb-2">
               <div className="w-3 h-3 bg-green-500 mr-2 rounded-full"></div>
               <span className="mr-2 text-sm">${ifApprovedPrice?.toFixed(2)}</span>
-              <span className="text-xs text-gray-400">If Approved</span>
+              <span className="text-xs text-zinc-400">If Approved</span>
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 bg-red-500 mr-2 rounded-full"></div>
               <span className="mr-2 text-sm">${ifRejectedPrice?.toFixed(2)}</span>
-              <span className="text-xs text-gray-400">If Rejected</span>
+              <span className="text-xs text-zinc-400">If Rejected</span>
             </div>
           </div>
 
@@ -112,13 +112,13 @@ export default function Card({
           <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={onAddAgents}
-              className="px-4 py-2 bg-pink-500 text-white font-medium rounded-md text-sm hover:bg-pink-600 transition-colors cursor-pointer"
+              className="px-4 py-2 bg-[#FF9EC5] text-black font-medium rounded-md text-sm hover:bg-[#FF9EC5]/90 transition-colors cursor-pointer"
             >
               Add Agents
             </button>
             <button 
               onClick={onAddLiquidity}
-              className="px-4 py-2 bg-pink-500 text-white font-medium rounded-md text-sm hover:bg-pink-600 transition-colors cursor-pointer"
+              className="px-4 py-2 bg-[#FF9EC5] text-black font-medium rounded-md text-sm hover:bg-[#FF9EC5]/90 transition-colors cursor-pointer"
             >
               Add Liquidity
             </button>
@@ -154,7 +154,7 @@ export default function Card({
           <div className="flex justify-center">
             <button 
               onClick={onRedeemTokens}
-              className="px-4 py-2 bg-pink-500 text-white font-medium rounded-md text-sm hover:bg-pink-600 transition-colors cursor-pointer"
+              className="px-4 py-2 bg-[#FF9EC5] text-black font-medium rounded-md text-sm hover:bg-[#FF9EC5]/90 transition-colors cursor-pointer"
             >
               Redeem Tokens
             </button>

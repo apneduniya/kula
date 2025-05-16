@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Chat from '../components/chat';
+import ChatSidebar from '../components/ChatSidebar';
 import { v4 as uuidv4 } from 'uuid';
 import WalletButton from '../components/wallet-connect-button';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 
 // Define the type for a decision
 interface Decision {
@@ -27,6 +29,7 @@ export default function Home() {
   const [currentChatId, setCurrentChatId] = useState<string | number>('');
   const [loading, setLoading] = useState(true);
   const [decisionsLoading, setDecisionsLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Initialize with a default chat or load from localStorage
   useEffect(() => {
@@ -117,6 +120,10 @@ export default function Home() {
     setCurrentChatId(chatId);
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   const getTimeAgo = (date: Date) => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - new Date(date).getTime());
@@ -132,78 +139,49 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-black">
-      <header className="bg-black text-white p-4 border-b border-gray-800 sticky top-0 z-10">
+    <div className="min-h-screen flex flex-col bg-black text-white">
+      <header className="bg-black text-white p-4 border-b border-zinc-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Kula</h1>
+          <h1 className="text-xl font-medium">Kula</h1>
           <div className="flex items-center space-x-4">
             <WalletButton />
           </div>
         </div>
       </header>
       
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar for previous proposals/decisions and chats - Fixed */}
-        <div className="w-64 bg-black text-white overflow-y-auto border-r border-gray-800 fixed top-16 bottom-0 left-0">
-          <div className="p-4">
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Chats</h2>
-                <button 
-                  onClick={createNewChat}
-                  className="w-6 h-6 flex items-center justify-center bg-gray-800 rounded-md hover:bg-pink-500 transition-colors cursor-pointer"
-                >
-                  <span className="text-sm font-bold">+</span>
-                </button>
-              </div>
-              
-              <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700">
-                {chats.map(chat => (
-                  <div 
-                    key={chat.id} 
-                    className={`p-2 rounded-md cursor-pointer transition-colors ${
-                      chat.id === currentChatId 
-                        ? 'bg-pink-500 text-white' 
-                        : 'bg-gray-900 hover:bg-gray-800 text-white'
-                    }`}
-                    onClick={() => switchToChat(chat.id)}
-                  >
-                    <p className="font-medium truncate">Chat {chats.indexOf(chat) + 1}</p>
-                    <div className="text-xs opacity-70">
-                      {getTimeAgo(chat.createdAt)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <h2 className="text-xl font-bold mb-4">Previous Decisions</h2>
-            
-            {decisionsLoading ? (
-              <div className="text-gray-400">Loading decisions...</div>
-            ) : previousDecisions.length > 0 ? (
-              <div className="space-y-3">
-                {previousDecisions.map((decision) => (
-                  <div 
-                    key={decision.id} 
-                    className="p-3 rounded-md bg-gray-900 cursor-pointer hover:bg-gray-800 border border-gray-800 transition-colors"
-                  >
-                    <p className="font-medium">{decision.title || 'Untitled Decision'}</p>
-                    <div className="flex justify-between text-xs text-gray-400 mt-1">
-                      <span>Created {getTimeAgo(new Date())}</span>
-                      <span>{decision.isResolved ? 'Resolved' : 'Active'}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-gray-400">No previous decisions found.</div>
-            )}
-          </div>
+      <div className="flex flex-1 overflow-hidden relative bg-black">
+        {/* Sidebar */}
+        <div 
+          className={`w-80 h-[calc(100vh-4rem)] bg-black overflow-hidden transition-all duration-300 ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } absolute md:relative z-10`}
+          style={{ backgroundColor: 'black' }}
+        >
+          <ChatSidebar 
+            chats={chats}
+            currentChatId={currentChatId}
+            decisions={previousDecisions}
+            decisionsLoading={decisionsLoading}
+            onCreateNewChat={createNewChat}
+            onSwitchChat={switchToChat}
+          />
         </div>
         
-        {/* Main Chat Area - With left margin to account for fixed sidebar */}
-        <div className="flex-1 overflow-hidden ml-64">
+        {/* Sidebar toggle button */}
+        <button 
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-zinc-900 text-white hover:bg-[#FF9EC5] hover:text-black w-7 h-14 flex items-center justify-center rounded-r-md border border-l-0 border-zinc-800 transition-all duration-300 cursor-pointer"
+          onClick={toggleSidebar}
+          style={{ 
+            left: sidebarOpen ? '320px' : '0px'
+          }}
+        >
+          {sidebarOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+        </button>
+        
+        {/* Main Chat Area */}
+        <div className={`flex-1 overflow-hidden transition-all duration-300 bg-black ${
+          sidebarOpen ? 'ml-0 md:ml-0' : 'ml-0'
+        }`}>
           {currentChatId && (
             <Chat 
               className="h-full" 

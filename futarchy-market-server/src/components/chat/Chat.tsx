@@ -523,19 +523,19 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
   };
 
   return (
-    <div className={`flex flex-col h-full bg-gray-900 ${className}`}>
-      <div className="flex items-center justify-between border-b border-gray-800 p-3">
+    <div className={`flex flex-col h-full bg-black ${className}`}>
+      <div className="flex items-center justify-between border-b border-zinc-800 p-4 h-16 px-6">
         <h2 className="text-lg font-medium text-white">Futarchy Chat</h2>
         <button 
           onClick={onNewChat}
-          className="flex items-center justify-center w-7 h-7 text-white bg-gray-800 rounded-md hover:bg-pink-500 transition-colors cursor-pointer"
+          className="flex items-center justify-center w-8 h-8 text-white bg-zinc-900 rounded-md hover:bg-[#FF9EC5] hover:text-black transition-colors cursor-pointer"
           title="Create new chat"
         >
           <span className="text-sm font-medium">+</span>
         </button>
       </div>
       
-      <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+      <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-black">
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <div className="text-white text-sm">Loading chat...</div>
@@ -566,20 +566,20 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="p-3 border-t border-gray-800">
+      <div className="p-4 pb-5 border-t border-zinc-800">
         <ChatInput onSendMessage={handleSendMessage} />
       </div>
 
       {/* USDC Popup */}
       {showUsdcPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-lg p-5 w-80 max-w-full border border-gray-700 shadow-lg">
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="bg-black rounded-lg p-5 w-80 max-w-full border border-zinc-800 shadow-lg">
             <h3 className="text-lg font-medium mb-3 text-white">Add USDC</h3>
             <div className="mb-4">
-              <label className="block text-gray-300 mb-2 text-sm">How much USDC worth of liquidity do you want to add?</label>
+              <label className="block text-zinc-300 mb-2 text-sm">How much USDC worth of liquidity do you want to add?</label>
               <input
                 type="number"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:border-pink-500 text-white text-sm"
+                className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-md focus:outline-none focus:border-[#FF9EC5] text-white text-sm"
                 value={usdcAmount}
                 onChange={(e) => setUsdcAmount(e.target.value)}
                 placeholder="0.00"
@@ -594,7 +594,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
                 Cancel
               </button> */}
               <button
-                className="px-3 py-1.5 bg-pink-500 text-white text-sm rounded-md hover:bg-pink-600 active:bg-pink-700 cursor-pointer"
+                className="px-3 py-1.5 bg-[#FF9EC5] text-black text-sm rounded-md hover:bg-[#FF9EC5]/90 active:bg-[#FF9EC5]/80 cursor-pointer"
                 onClick={handleSubmitUsdc}
                 disabled={!usdcAmount || parseFloat(usdcAmount) <= 0}
               >
