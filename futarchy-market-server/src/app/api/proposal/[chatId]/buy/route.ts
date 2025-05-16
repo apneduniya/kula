@@ -2,7 +2,7 @@
 // so better return the txn IXN
 
 import { NextRequest, NextResponse } from 'next/server';
-import { FutarchyRPCClient, AUTOCRAT_VERSIONS, getMidPrice, SwapPreview, AmmMarket, FutarchyAmmMarketsClient } from "@metadaoproject/futarchy-sdk";
+import { FutarchyRPCClient, AUTOCRAT_VERSIONS, getMidPrice, SwapPreview, AmmMarket, FutarchyAmmMarketsClient } from "@metadaoproject/futarchy";
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
 import { Connection, PublicKey, TransactionInstruction, clusterApiUrl } from "@solana/web3.js";
 
