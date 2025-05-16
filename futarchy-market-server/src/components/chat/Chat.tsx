@@ -524,7 +524,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
 
   return (
     <div className={`flex flex-col h-full bg-black ${className}`}>
-      <div className="flex items-center justify-between border-b border-zinc-800 p-4 h-16 px-6">
+      <div className="flex items-center justify-between border-b border-zinc-800 p-4 h-16 px-6 flex-shrink-0 sticky top-0 z-10">
         <h2 className="text-lg font-medium text-white">Futarchy Chat</h2>
         <button 
           onClick={onNewChat}
@@ -535,7 +535,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
         </button>
       </div>
       
-      <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-black">
+      <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-black pb-4">
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <div className="text-white text-sm">Loading chat...</div>
@@ -566,7 +566,7 @@ const Chat: React.FC<ChatProps> = ({ className = '', chatId, onNewChat, onSendMe
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="p-4 pb-5 border-t border-zinc-800">
+      <div className="p-4 pb-5 border-t border-zinc-800 flex-shrink-0 sticky bottom-0 bg-black z-10">
         <ChatInput onSendMessage={handleSendMessage} />
       </div>
 

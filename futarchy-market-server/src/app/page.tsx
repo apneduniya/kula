@@ -152,9 +152,9 @@ export default function Home() {
       <div className="flex flex-1 overflow-hidden relative bg-black">
         {/* Sidebar */}
         <div 
-          className={`w-80 h-[calc(100vh-4rem)] bg-black overflow-hidden transition-all duration-300 ${
+          className={`w-80 h-[calc(100vh-4rem)] bg-black transition-all duration-300 ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } absolute md:relative z-10`}
+          } fixed md:fixed top-[4rem] left-0 z-10`}
           style={{ backgroundColor: 'black' }}
         >
           <ChatSidebar 
@@ -169,7 +169,7 @@ export default function Home() {
         
         {/* Sidebar toggle button */}
         <button 
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-zinc-900 text-white hover:bg-[#FF9EC5] hover:text-black w-7 h-14 flex items-center justify-center rounded-r-md border border-l-0 border-zinc-800 transition-all duration-300 cursor-pointer"
+          className="fixed left-0 top-1/2 -translate-y-1/2 z-20 bg-zinc-900 text-white hover:bg-[#FF9EC5] hover:text-black w-7 h-14 flex items-center justify-center rounded-r-md border border-l-0 border-zinc-800 transition-all duration-300 cursor-pointer"
           onClick={toggleSidebar}
           style={{ 
             left: sidebarOpen ? '320px' : '0px'
@@ -180,7 +180,7 @@ export default function Home() {
         
         {/* Main Chat Area */}
         <div className={`flex-1 overflow-hidden transition-all duration-300 bg-black ${
-          sidebarOpen ? 'ml-0 md:ml-0' : 'ml-0'
+          sidebarOpen ? 'ml-80' : 'ml-0'
         }`}>
           {currentChatId && (
             <Chat 

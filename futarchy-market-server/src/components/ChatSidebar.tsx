@@ -61,12 +61,12 @@ export default function ChatSidebar({
   return (
     <div className="h-full bg-black flex flex-col">
       <SidebarProvider defaultOpen={true}>
-        <Sidebar className="border-r border-zinc-800 bg-black h-full">
-          <SidebarHeader className="flex h-16 items-center border-b border-zinc-800 px-6 bg-black">
+        <Sidebar className="border-r border-zinc-800 bg-black h-full flex flex-col">
+          <SidebarHeader className="flex h-16 items-center border-b border-zinc-800 px-6 bg-black flex-shrink-0">
             <h2 className="text-lg font-medium text-white">Chats</h2>
           </SidebarHeader>
           
-          <SidebarContent className="bg-black">
+          <SidebarContent className="bg-black overflow-y-auto flex-grow">
             <SidebarGroup>
               <div className="flex items-center justify-between px-6 py-4 mt-2">
                 <SidebarGroupLabel className="text-sm font-medium text-zinc-400">
@@ -149,7 +149,7 @@ export default function ChatSidebar({
             </SidebarGroup>
           </SidebarContent>
           
-          <SidebarFooter className="border-t border-zinc-800 p-6 bg-black mt-auto">
+          <SidebarFooter className="border-t border-zinc-800 p-6 bg-black mt-auto flex-shrink-0">
             <div className="text-xs text-zinc-500">
               Kula Futarchy Markets
             </div>
