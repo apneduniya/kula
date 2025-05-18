@@ -10,7 +10,7 @@ class MessageService:
         """Initialize the MessageService with a MessageRepository instance."""
         self.message_repository: MessageRepository = MessageRepository()
 
-    async def send_message(self, message: MessageSchema) -> MessageSchema:
+    async def save_message(self, message: MessageSchema) -> MessageSchema:
         """Save a message to the database"""
         message_orm = message.to_orm()
         result = await self.message_repository.save(message_orm)

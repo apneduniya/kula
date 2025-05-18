@@ -13,3 +13,12 @@ class ChatSchema(BaseSchema):
     user_id: int
     
     messages: t.List[MessageSchema | None] = []
+
+
+class ChatSchemaWithoutMessages(BaseSchema):
+    __orm__ = ChatOrm
+
+    title: str
+    user_id: int
+    
+    

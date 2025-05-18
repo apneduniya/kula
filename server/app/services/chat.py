@@ -2,7 +2,7 @@ import typing as t
 import asyncio
 
 from app.schemas.core.pageable import PageRequestSchema, PageResponseSchema
-from app.schemas.repository.chat import ChatSchema
+from app.schemas.repository.chat import ChatSchema, ChatSchemaWithoutMessages
 from app.repositories.chat import ChatRepository
 from app.schemas.repository.message import MessageSchema
 
@@ -50,12 +50,12 @@ class ChatService:
         result = await self.chat_repository.get_chat_by_id(chat_id)
         return ChatSchema.model_validate(result) if result else None
     
-    async def get_chats_by_user_id(self, user_id: int) -> t.List[ChatSchema]:
+    async def get_chats_by_user_id(self, user_id: int) -> t.List[ChatSchemaWithoutMessages]:
         """
         Get a chat by user ID.
         """
         result = await self.chat_repository.get_chats_by_user_id(user_id)
-        return [ChatSchema.model_validate(chat) for chat in result]
+        return [ChatSchemaWithoutMessages.model_validate(chat) for chat in result]
     
     async def get_messages_by_chat_id(self, chat_id: int) -> t.List[MessageSchema]:
         """

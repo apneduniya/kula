@@ -11,3 +11,4 @@ asyncpg
 greenlet
 typing_inspect
 httpx
+openai
