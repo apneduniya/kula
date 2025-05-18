@@ -95,7 +95,7 @@ class ChatRepository(GenericRepository[ChatOrm]):
             >>> print(chats)
         """
         async with get_db_session() as session:
-            query = select(ChatOrm).options(selectinload(ChatOrm.messages)).filter(ChatOrm.user_id == user_id)
+            query = select(ChatOrm).filter(ChatOrm.user_id == user_id)
             result = await session.execute(query)
             return result.unique().scalars().all()
         

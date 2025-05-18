@@ -7,12 +7,13 @@ from app.core.logging import logger
 
 from app.services.chat import ChatService
 from app.services.messages import MessageService
+from app.services.agent.chat import ChatAgentService
 
 from app.schemas.core.base import BackendAPIResponse
 from app.schemas.chat import RequestCreateNewChat, ResponseCreateNewChat
 from app.schemas.message import RequestSendMessage, ResponseSendMessage
 from app.schemas.repository.message import MessageSchema
-from app.schemas.repository.chat import ChatSchema
+from app.schemas.repository.chat import ChatSchema, ChatSchemaWithoutMessages
 
 
 chat_router = APIRouter()
@@ -23,11 +24,12 @@ class ChatController:
     def __init__(self):
         self.chat_service = ChatService()
         self.message_service = MessageService()
+        self.chat_agent_service = ChatAgentService()
 
     @chat_router.post("/new")
     async def create_new_chat(self, request: RequestCreateNewChat) -> BackendAPIResponse[ResponseCreateNewChat]:
         """
-        Create a new chat message in the database.
+        Create a new chat message in the database and in return, get the chat ID.
         """
         chat_schema = ChatSchema(user_id=request.user_id, title=request.title)
 
@@ -39,12 +41,13 @@ class ChatController:
                 data=ResponseCreateNewChat(chat_id=result.id)
             )
         else:
+            logger.error(f"Failed to create chat for user_id: {request.user_id}")
             raise HTTPException(status_code=400, detail="Failed to create chat")
     
     @chat_router.get("/{chat_id}")
     async def get_chat_by_id(self, chat_id: uuid.UUID) -> BackendAPIResponse[ChatSchema]:
         """
-        Get a chat by ID.
+        Get a chat by ID and in return, get the list of messages.
         """
         result = await self.chat_service.get_chat_by_id(chat_id)
         if result:
@@ -54,6 +57,7 @@ class ChatController:
                 data=result
             )
         else:
+            logger.error(f"Chat not found for chat_id: {chat_id}")
             raise HTTPException(status_code=404, detail="Chat not found")
         
     @chat_router.get("/{chat_id}/messages")
@@ -69,15 +73,16 @@ class ChatController:
                 data=result
             )
         else:
+            logger.error(f"Messages not found for chat_id: {chat_id}")
             raise HTTPException(status_code=404, detail="Messages not found")
         
-
     @chat_router.post("/{chat_id}/send-message")
     async def send_message(self, chat_id: uuid.UUID, request: RequestSendMessage) -> BackendAPIResponse[ResponseSendMessage]:
         """
-        Send a message to a chat.
+        Send a message to a chat and in return, get the list of messages.
         """
-        message_schema = MessageSchema(
+        # save the user message
+        user_message_schema = MessageSchema(
             chat_id=chat_id,
             content=request.content,
             type="text", # TODO: in later version, we will add type of the message - user can send text, image, audio, video, etc.
@@ -85,20 +90,47 @@ class ChatController:
             is_from_user=True
         )
 
-        result = await self.message_service.send_message(message_schema)
-        if result:
-            return BackendAPIResponse(
-                success=True,
-                message="Message sent successfully",
-                data=ResponseSendMessage(messages=[result])
-            )
-        else:
+        result = await self.message_service.save_message(user_message_schema)
+        if not result:
+            logger.error(f"Failed to send message for chat_id: {chat_id}")
             raise HTTPException(status_code=400, detail="Failed to send message")
-    
+        
+        # call the agent service to generate a response
+        agent_response = await self.chat_agent_service.general_agent_response(chat_id)
+        if not agent_response:
+            logger.error(f"Failed to generate response for chat_id: {chat_id}")
+            raise HTTPException(status_code=400, detail="Failed to generate response")
+        
+        # save the agent message
+        agent_message_schema = MessageSchema(
+            chat_id=chat_id,
+            content=agent_response.content,
+            type="text",
+            media=None,
+            is_from_user=False
+        )
+
+        result = await self.message_service.save_message(agent_message_schema)
+        if not result:
+            logger.error(f"Failed to save agent message for chat_id: {chat_id}")
+            raise HTTPException(status_code=400, detail="Failed to save agent message")
+        
+        # get the list of messages (including the new user message and the agent message)
+        current_messages = await self.chat_service.get_messages_by_chat_id(chat_id)
+        if not current_messages:
+            logger.error(f"Failed to get messages for chat_id: {chat_id}")
+            raise HTTPException(status_code=400, detail="Failed to get messages")
+        
+        return BackendAPIResponse(
+            success=True,
+            message="Message sent successfully",
+            data=ResponseSendMessage(messages=current_messages)
+        )
+
     @chat_router.get("/user/{user_id}")
-    async def get_chats_by_user_id(self, user_id: int) -> BackendAPIResponse[t.List[ChatSchema]]:
+    async def get_chats_by_user_id(self, user_id: int) -> BackendAPIResponse[t.List[ChatSchemaWithoutMessages]]:
         """
-        Get all chats by user ID.
+        Get all chats by user ID (without messages).
         """
         result = await self.chat_service.get_chats_by_user_id(user_id)
         if result:
@@ -108,4 +140,5 @@ class ChatController:
                 data=result
             )
         else:
+            logger.error(f"Chats not found for user_id: {user_id}")
             raise HTTPException(status_code=404, detail="Chats not found")
