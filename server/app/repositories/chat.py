@@ -121,4 +121,26 @@ class ChatRepository(GenericRepository[ChatOrm]):
 
             return data, total_count
         
+    async def get_user_id_by_chat_id(self, chat_id: int) -> int:
+        """
+        Retrieve the user ID associated with a specific chat.
+
+        This method fetches the user ID from the ChatOrm table based on the provided chat ID.
+
+        Args:
+            chat_id (int): The ID of the chat to retrieve the user ID for
+
+        Returns:
+            int: The user ID associated with the given chat ID
+            
+        Example:
+            >>> chat_repo = ChatRepository()
+            >>> user_id = await chat_repo.get_user_id_by_chat_id(1)
+            >>> print(user_id)
+        """
+        async with get_db_session() as session:
+            query = select(ChatOrm.user_id).filter(ChatOrm.id == chat_id)
+            result = await session.execute(query)
+            return result.scalar()
+        
         

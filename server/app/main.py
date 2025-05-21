@@ -11,6 +11,7 @@ from app.config.settings import config
 from app.core.logging import logger
 
 from app.controllers.chat import chat_router
+from app.controllers.playground import playground_router
 
 
 @asynccontextmanager
@@ -58,8 +59,9 @@ def create_application() -> FastAPI:
 
     #  I N C L U D E   R O U T E R S
 
-    app.include_router(chat_router, prefix="/chat", tags=["chat"])
-
+    app.include_router(chat_router)
+    app.include_router(playground_router)
+    
     logger.info("Application setup complete")
     return app
 

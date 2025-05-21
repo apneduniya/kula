@@ -12,3 +12,7 @@ greenlet
 typing_inspect
 httpx
 openai
+agno
+composio
+composio_agno
+psycopg2-binary
