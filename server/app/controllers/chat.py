@@ -51,53 +51,13 @@ class ChatController:
         else:
             logger.error(f"Failed to create chat for user_id: {request.user_id}")
             raise HTTPException(status_code=400, detail="Failed to create chat")
-        
-            
-    @chat_router.post("/{chat_id}/send-message")
-    async def send_message(self, chat_id: uuid.UUID, request: RequestSendMessage) -> StreamingResponse:
-        """
-        Send a message to a chat and stream the response.
-        """
-        user_id: int = await self.chat_service.get_user_id_by_chat_id(chat_id)
-
-        chat_workflow = ChatWorkflow(
-            storage=self.chat_storage,
-            user_id=str(user_id),
-            session_id=str(chat_id),
-            debug_mode=True
-        )
-
-        response: t.Iterator[RunResponse] = chat_workflow.run(
-            user_message=request.content
-        )
-
-        async def generate():
-            try:
-                for run_response in response:
-                    if run_response.content:
-                        # Format the response as a Server-Sent Event
-                        yield run_response.content
-            except Exception as e:
-                logger.error(f"Error in streaming response: {e}")
-                yield f"Error: {e}"
-
-        return StreamingResponse(
-            content=generate(),
-            media_type="text/event-stream",
-            headers={
-                "Cache-Control": "no-cache",
-                "Connection": "keep-alive",
-                "X-Accel-Buffering": "no"
-            }
-        )
-        
     
     @chat_router.get("/{chat_id}")
-    async def get_chat_by_id(self, chat_id: uuid.UUID) -> BackendAPIResponse[ChatSchema]:
+    async def get_chat_by_id(self, chat_id: uuid.UUID) -> BackendAPIResponse[ChatSchemaWithoutMessages]:
         """
         Get a chat by ID and in return, get the list of messages.
         """
-        result = await self.chat_service.get_chat_by_id(chat_id)
+        result = await self.chat_service.get_chat_by_id_without_messages(chat_id)
         if result:
             return BackendAPIResponse(
                 success=True,
@@ -107,23 +67,7 @@ class ChatController:
         else:
             logger.error(f"Chat not found for chat_id: {chat_id}")
             raise HTTPException(status_code=404, detail="Chat not found")
-        
-    @chat_router.get("/{chat_id}/messages")
-    async def get_messages_by_chat_id(self, chat_id: uuid.UUID) -> BackendAPIResponse[t.List[MessageSchema]]:
-        """
-        Get all messages by chat ID.
-        """
-        result = await self.chat_service.get_messages_by_chat_id(chat_id)
-        if result:
-            return BackendAPIResponse(
-                success=True,
-                message="Messages fetched successfully",
-                data=result
-            )
-        else:
-            logger.error(f"Messages not found for chat_id: {chat_id}")
-            raise HTTPException(status_code=404, detail="Messages not found")
-
+   
     @chat_router.get("/user/{user_id}")
     async def get_chats_by_user_id(self, user_id: int) -> BackendAPIResponse[t.List[ChatSchemaWithoutMessages]]:
         """

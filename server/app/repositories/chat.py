@@ -48,6 +48,15 @@ class ChatRepository(GenericRepository[ChatOrm]):
             result = await session.execute(query)
             chat = result.scalar_one_or_none()
             return chat
+        
+    async def get_chat_by_id_without_messages(self, chat_id: int) -> t.Optional[ChatOrm]:
+        """
+        Retrieve a chat by its ID without its messages.
+        """
+        async with get_db_session() as session:
+            query = select(ChatOrm).filter(ChatOrm.id == chat_id)
+            result = await session.execute(query)
+            return result.scalar_one_or_none()
     
     async def get_messages_by_chat_id(self, chat_id: int) -> t.List[MessageOrm | None]:
         """

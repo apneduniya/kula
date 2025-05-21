@@ -50,6 +50,13 @@ class ChatService:
         result = await self.chat_repository.get_chat_by_id(chat_id)
         return ChatSchema.model_validate(result) if result else None
     
+    async def get_chat_by_id_without_messages(self, chat_id: int) -> t.Optional[ChatSchemaWithoutMessages]:
+        """
+        Get a chat by ID without its messages.
+        """
+        result = await self.chat_repository.get_chat_by_id_without_messages(chat_id)
+        return ChatSchemaWithoutMessages.model_validate(result) if result else None
+    
     async def get_chats_by_user_id(self, user_id: int) -> t.List[ChatSchemaWithoutMessages]:
         """
         Get a chat by user ID.
