@@ -2,9 +2,9 @@
 // so better return the txn IXN
 
 import { NextRequest, NextResponse } from 'next/server';
-import { FutarchyRPCClient, AUTOCRAT_VERSIONS, getMidPrice, SwapPreview, AmmMarket, FutarchyAmmMarketsClient } from "@metadaoproject/futarchy";
+import { AmmClient } from '@metadaoproject/futarchy/v0.4';
 import { AnchorProvider, Wallet } from "@coral-xyz/anchor";
-import { Connection, PublicKey, TransactionInstruction, clusterApiUrl } from "@solana/web3.js";
+import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 
 export async function POST(req: NextRequest, { params }: { params: { chatId: string } }) {
   try {
@@ -12,62 +12,61 @@ export async function POST(req: NextRequest, { params }: { params: { chatId: str
     const body = await req.json();
     const { userAddress, marketSide, amountInUSDC, agentWalletAddress, passMarketAccount, failMarketAccount } = body;
 
-    if (marketSide == 'YES') {
-        // agent buys X USDC worth of PASS -> GETS relevant amount of YES tokens + X fUSDC
-        // 1. get price of YES to calculate Y(no of YES tokens bought with X USDC)
-        // 2. make the buy IXN + return the txn IXN/signature
-        
-        const price = await getMidPrice() // price in USDC per YES token
-        const outputAmountInYESTokens = amountInUSDC/price;
+    const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
+    const wallet = { publicKey: new PublicKey(userAddress) } as Wallet;
+    const provider = new AnchorProvider(connection, wallet, {});
+    
+    const ammClient = AmmClient.createClient({ provider });
+    
+    let txSignature;
+    let outputAmount;
+    
+    if (marketSide === 'YES') {
+      // buy YES tokens
+      const passMarketPubkey = new PublicKey(passMarketAccount);
 
-        // getting the apt price quote
-        // const quote = 
-        // const BuyammSwap = SwapType.buy(amountInUSDC, baseQuote)
-
-        const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed")
-        const wallet = { publicKey: new PublicKey(userAddress) } as Wallet
-        const provider = new AnchorProvider(connection, wallet);
-        const programVersion = AUTOCRAT_VERSIONS[0];
-        const client = FutarchyRPCClient.make(provider, undefined);
-
-        const ammClient = FutarchyAmmMarketsClient(
-          provider,
-          connection,
-          client
-        );
-
-        const preview = await ammClient.getSwapPreview(passMarketAccount, amountInUSDC, true, 0.01);
-
-        const tx = await ammClient.swap(
-          passMarketAccount,
-          { buy: {} },
-          amountInUSDC,
-          preview.outputUnits,
-          0.01
-        );
-        const quote = 
-
+      const tx = await ammClient.swap(
+        passMarketPubkey,
+        { buy: {} },  // buy option for YES tokens
+        amountInUSDC,
+        Math.floor(amountInUSDC * 0.95) // Allow 5% slippage by default
+      );
+      
+      txSignature = tx;
+      outputAmount = Math.floor(amountInUSDC * 0.95); // Estimate
+    } 
+    else if (marketSide === 'NO') {
+      // For NO tokens, use the FAIL market account
+      const failMarketPubkey = new PublicKey(failMarketAccount);
+      
+      // buy NO tokens
+      const tx = await ammClient.swap(
+        failMarketPubkey,
+        { buy: {} },  
+        amountInUSDC, 
+        Math.floor(amountInUSDC * 0.95) // Allow 5% slippage by default
+      );
+      
+      txSignature = tx;
+      outputAmount = Math.floor(amountInUSDC * 0.95); 
     }
-    else if(marketSide == 'NO'){
-        // agent buys X USDC worth of FAIL -> GETS relevant amount of NO tokens + X pUSDC
-        // similar as w YES
-    }
+    
     return NextResponse.json(
       { 
         success: true,
-        txSignature: tx,
-        swapResponse: ,
-        amountofConditionalTokensReceived: ,
+        txSignature: txSignature,
+        amountofConditionalTokensReceived: outputAmount,
       }, 
       { status: 200 }
     );
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error processing buy order:", error);
     return NextResponse.json(
       { 
         success: false, 
-        message: "Failed to process buy order" 
+        message: "Failed to process buy order",
+        error: error.toString()
       }, 
       { status: 500 }
     );
