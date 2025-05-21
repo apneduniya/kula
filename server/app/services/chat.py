@@ -64,4 +64,11 @@ class ChatService:
         result = await self.chat_repository.get_messages_by_chat_id(chat_id)
         return [MessageSchema.model_validate(message) for message in result]
     
+    async def get_user_id_by_chat_id(self, chat_id: int) -> int:
+        """
+        Get user ID by chat ID.
+        """
+        result = await self.chat_repository.get_user_id_by_chat_id(chat_id)
+        return result
+    
 

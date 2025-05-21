@@ -1,14 +1,19 @@
 import typing as t
 import uuid
+
 from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi.responses import StreamingResponse
 from fastapi_restful.cbv import cbv
 
-from app.core.logging import logger
+from agno.storage.postgres import PostgresStorage
+from agno.workflow import RunResponse
 
+from app.config.settings import config
+from app.core.logging import logger
 from app.services.chat import ChatService
 from app.services.messages import MessageService
-from app.services.agent.chat import ChatAgentService
-
+from app.agent.workflows.chat import ChatWorkflow
+from app.models.llm import LLMResponse
 from app.schemas.core.base import BackendAPIResponse
 from app.schemas.chat import RequestCreateNewChat, ResponseCreateNewChat
 from app.schemas.message import RequestSendMessage, ResponseSendMessage
@@ -16,7 +21,7 @@ from app.schemas.repository.message import MessageSchema
 from app.schemas.repository.chat import ChatSchema, ChatSchemaWithoutMessages
 
 
-chat_router = APIRouter()
+chat_router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
 @cbv(chat_router)
@@ -24,7 +29,10 @@ class ChatController:
     def __init__(self):
         self.chat_service = ChatService()
         self.message_service = MessageService()
-        self.chat_agent_service = ChatAgentService()
+        self.chat_storage = PostgresStorage(
+            table_name="agent_chat",
+            db_url=config.DATABASE_URL
+        )
 
     @chat_router.post("/new")
     async def create_new_chat(self, request: RequestCreateNewChat) -> BackendAPIResponse[ResponseCreateNewChat]:
@@ -43,6 +51,46 @@ class ChatController:
         else:
             logger.error(f"Failed to create chat for user_id: {request.user_id}")
             raise HTTPException(status_code=400, detail="Failed to create chat")
+        
+            
+    @chat_router.post("/{chat_id}/send-message")
+    async def send_message(self, chat_id: uuid.UUID, request: RequestSendMessage) -> StreamingResponse:
+        """
+        Send a message to a chat and stream the response.
+        """
+        user_id: int = await self.chat_service.get_user_id_by_chat_id(chat_id)
+
+        chat_workflow = ChatWorkflow(
+            storage=self.chat_storage,
+            user_id=str(user_id),
+            session_id=str(chat_id),
+            debug_mode=True
+        )
+
+        response: t.Iterator[RunResponse] = chat_workflow.run(
+            user_message=request.content
+        )
+
+        async def generate():
+            try:
+                for run_response in response:
+                    if run_response.content:
+                        # Format the response as a Server-Sent Event
+                        yield run_response.content
+            except Exception as e:
+                logger.error(f"Error in streaming response: {e}")
+                yield f"Error: {e}"
+
+        return StreamingResponse(
+            content=generate(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no"
+            }
+        )
+        
     
     @chat_router.get("/{chat_id}")
     async def get_chat_by_id(self, chat_id: uuid.UUID) -> BackendAPIResponse[ChatSchema]:
@@ -75,57 +123,6 @@ class ChatController:
         else:
             logger.error(f"Messages not found for chat_id: {chat_id}")
             raise HTTPException(status_code=404, detail="Messages not found")
-        
-    @chat_router.post("/{chat_id}/send-message")
-    async def send_message(self, chat_id: uuid.UUID, request: RequestSendMessage) -> BackendAPIResponse[ResponseSendMessage]:
-        """
-        Send a message to a chat and in return, get the list of messages.
-        """
-        # save the user message
-        user_message_schema = MessageSchema(
-            chat_id=chat_id,
-            content=request.content,
-            type="text", # TODO: in later version, we will add type of the message - user can send text, image, audio, video, etc.
-            media=None, # TODO: in later version, we will add media - user can send media in url format
-            is_from_user=True
-        )
-
-        result = await self.message_service.save_message(user_message_schema)
-        if not result:
-            logger.error(f"Failed to send message for chat_id: {chat_id}")
-            raise HTTPException(status_code=400, detail="Failed to send message")
-        
-        # call the agent service to generate a response
-        agent_response = await self.chat_agent_service.general_agent_response(chat_id)
-        if not agent_response:
-            logger.error(f"Failed to generate response for chat_id: {chat_id}")
-            raise HTTPException(status_code=400, detail="Failed to generate response")
-        
-        # save the agent message
-        agent_message_schema = MessageSchema(
-            chat_id=chat_id,
-            content=agent_response.content,
-            type="text",
-            media=None,
-            is_from_user=False
-        )
-
-        result = await self.message_service.save_message(agent_message_schema)
-        if not result:
-            logger.error(f"Failed to save agent message for chat_id: {chat_id}")
-            raise HTTPException(status_code=400, detail="Failed to save agent message")
-        
-        # get the list of messages (including the new user message and the agent message)
-        current_messages = await self.chat_service.get_messages_by_chat_id(chat_id)
-        if not current_messages:
-            logger.error(f"Failed to get messages for chat_id: {chat_id}")
-            raise HTTPException(status_code=400, detail="Failed to get messages")
-        
-        return BackendAPIResponse(
-            success=True,
-            message="Message sent successfully",
-            data=ResponseSendMessage(messages=current_messages)
-        )
 
     @chat_router.get("/user/{user_id}")
     async def get_chats_by_user_id(self, user_id: int) -> BackendAPIResponse[t.List[ChatSchemaWithoutMessages]]:
