@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, List, Optional, Any
+from typing import Generic, TypeVar, List, Optional, Any, Tuple
 
 from sqlalchemy import select, delete, func
 from sqlalchemy.exc import NoResultFound
@@ -50,7 +50,7 @@ class GenericRepository(BaseRepository[T]):
         """
         self._model = model
 
-    async def save(self, entity: T) -> T:
+    async def xsave(self, entity: T) -> T:
         """
         Save the given entity to the database.
 
@@ -113,7 +113,7 @@ class GenericRepository(BaseRepository[T]):
             result = await session.execute(query)
             return result.scalars().all()
 
-    async def get_paged_items(self, pageable: PageRequestSchema, params: dict) -> tuple[List[T], int]:
+    async def get_paged_items(self, pageable: PageRequestSchema, params: dict) -> Tuple[List[T], int]:
         """
         Retrieve a paginated list of entities based on the given parameters.
 

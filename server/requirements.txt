@@ -16,3 +16,4 @@ agno
 composio
 composio_agno
 psycopg2-binary
+motor
