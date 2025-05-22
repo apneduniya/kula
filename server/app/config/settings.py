@@ -39,6 +39,9 @@ class Config(BaseSettings):
     ASYNC_DATABASE_URL: str = ""
     DB_ECHO: bool = False
 
+    MONGO_DB_CONNECTION_STRING: str = ""
+    MONGO_DB_NAME: str = ""
+
     # Agno Configuration
     AGNO_MONITOR: bool = False
 
