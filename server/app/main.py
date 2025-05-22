@@ -60,7 +60,7 @@ def create_application() -> FastAPI:
     #  I N C L U D E   R O U T E R S
 
     app.include_router(chat_router)
-    app.include_router(playground_router)
+    app.include_router(playground_router, prefix="/v1")
     
     logger.info("Application setup complete")
     return app
@@ -73,6 +73,8 @@ if __name__ == "__main__":
     uvicorn.run(
         "app.main:create_application",
         factory=True,
+        host=config.HOST,
+        port=config.PORT,
         log_level=config.LOG_LEVEL.lower(),
         access_log=True,
         reload=True,
