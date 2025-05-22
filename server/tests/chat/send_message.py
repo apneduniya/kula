@@ -5,10 +5,10 @@ import json
 from typing import AsyncGenerator
 
 
-USER_ID = 1111111
+USER_ID = 1234
 
 CHAT_TITLE = "Test Chat"
-CHAT_ID = None
+CHAT_ID = "0a216774-f8dc-409e-8b4e-e7b86bccf90a"
 
 
 async def stream_response(response) -> AsyncGenerator[str, None]:

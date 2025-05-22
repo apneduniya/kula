@@ -4,7 +4,8 @@ from agno.agent import Agent
 from agno.workflow import Workflow, RunResponse
 from agno.models.openai import OpenAIChat
 from agno.storage.postgres import PostgresStorage
-
+from agno.memory.v2.db.postgres import PostgresMemoryDb
+from agno.memory.v2.memory import Memory
 from app.core.logging import logger
 from app.config.settings import config
 from app.models.agent.questioning_agent import QuestioningAgentResponseModel
@@ -55,19 +56,19 @@ class ChatWorkflow(Workflow):
         debug_mode=False,
     )
 
-    def get_questions(self, user_message: str) -> t.Optional[QuestioningAgentResponseModel]:
+    def get_questions(self, proposal: str) -> t.Optional[QuestioningAgentResponseModel]:
         try:
-            logger.info(f"Getting questions for user_message: {user_message}")
-            response: RunResponse = self.questioning_agent.run(user_message)
+            logger.info(f"Getting questions for proposal: {proposal}")
+            response: RunResponse = self.questioning_agent.run(proposal)
 
             # Check if we got a valid response
             if not response or not response.content:
-                logger.warning(f"No response from questioning agent for user_message: {user_message}")
+                logger.warning(f"No response from questioning agent for proposal: {proposal}")
                 return None
 
             # Check if the response is of the expected type
             if not isinstance(response.content, QuestioningAgentResponseModel):
-                logger.warning(f"Invalid response type from questioning agent for user_message: {user_message}")
+                logger.warning(f"Invalid response type from questioning agent for proposal: {proposal}")
                 return None
 
             return response.content
@@ -76,18 +77,18 @@ class ChatWorkflow(Workflow):
             logger.error(f"Error in get_questions: {e}")
             return None
 
-    def get_characters(self, user_message: str) -> t.Optional[MotherAgentResponseModel]:
+    def get_characters(self, proposal: str) -> t.Optional[MotherAgentResponseModel]:
         try:
-            logger.info(f"Getting characters for user_message: {user_message}")
-            response: RunResponse = self.mother_agent.run(user_message)
+            logger.info(f"Getting characters for proposal: {proposal}")
+            response: RunResponse = self.mother_agent.run(proposal)
 
             # Check if we got a valid response
             if not response or not response.content:
-                logger.warning(f"No response from character agent for user_message: {user_message}")
+                logger.warning(f"No response from character agent for proposal: {proposal}")
                 return None
             # Check if the response is of the expected type
             if not isinstance(response.content, MotherAgentResponseModel):
-                logger.warning(f"Invalid response type from character agent for user_message: {user_message}")
+                logger.warning(f"Invalid response type from character agent for proposal: {proposal}")
                 return None
             
             return response.content
@@ -98,11 +99,11 @@ class ChatWorkflow(Workflow):
         return None
 
 
-    def run(self, user_message: str) -> t.Iterator[RunResponse]:
-        logger.info(f"Running ChatWorkflow for user_message: {user_message}")
+    def run(self, proposal: str) -> t.Iterator[RunResponse]:
+        logger.info(f"Running ChatWorkflow for proposal: {proposal}")
 
         # Getting information from the user
-        questioning_agent_response: t.Optional[QuestioningAgentResponseModel] = self.get_questions(user_message)
+        questioning_agent_response: t.Optional[QuestioningAgentResponseModel] = self.get_questions(proposal)
 
         if not questioning_agent_response:
             yield RunResponse(
@@ -119,7 +120,7 @@ class ChatWorkflow(Workflow):
             return
 
         # Ask the mother agent to generate characters for the world simulation
-        mother_agent_response: t.Optional[MotherAgentResponseModel] = self.get_characters(user_message)
+        mother_agent_response: t.Optional[MotherAgentResponseModel] = self.get_characters(proposal)
 
         if not mother_agent_response:
             yield RunResponse(
@@ -133,11 +134,11 @@ class ChatWorkflow(Workflow):
         characters: t.List[Character] = [Character(profile=character) for character in mother_agent_response.characters]
 
         # Create a world simulator
-        world_simulator: WorldSimulator = WorldSimulator(characters=characters, proposal=user_message)
+        world_simulator: WorldSimulator = WorldSimulator(characters=characters, proposal=proposal)
 
         logger.info(f"World simulator created. Running the simulation...")
 
-        yield from world_simulator.to_team().run(f"The proposal which you need to simulate the world is: {user_message}. The agents will act like target audience/effected user of this proposal and respond to the proposal.", stream=True)
+        yield from world_simulator.to_team().run(f"The proposal which you need to simulate the world is: {proposal}. The agents will act like target audience/effected user of this proposal and respond to the proposal.", stream=True)
 
 
 def get_chat_workflow(
@@ -146,13 +147,20 @@ def get_chat_workflow(
     debug_mode: bool = False
 ) -> ChatWorkflow:
     chat_storage = PostgresStorage(
-        table_name="agent_chat",
+        table_name="chat_workflow_storage",
         db_url=config.DATABASE_URL
     )
+    chat_memory = PostgresMemoryDb(
+        table_name="chat_workflow_memory",
+        db_url=config.DATABASE_URL
+    )
+    memory = Memory(db=chat_memory)
 
     return ChatWorkflow(
         storage=chat_storage,
-        user_id=user_id,
+        memory=memory,
+
+        user_id=str(user_id),
         session_id=session_id,
-        debug_mode=debug_mode
+        debug_mode=debug_mode,
     )

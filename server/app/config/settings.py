@@ -23,6 +23,8 @@ class Config(BaseSettings):
     ALLOWED_CREDENTIALS: bool = True
     ALLOWED_METHODS: list[str] = ["*"]
     ALLOWED_HEADERS: list[str] = ["*"]
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
 
     # Frontend Configuration
     FRONTEND_URL: str = ""
@@ -36,6 +38,9 @@ class Config(BaseSettings):
     DATABASE_URL: str = ""
     ASYNC_DATABASE_URL: str = ""
     DB_ECHO: bool = False
+
+    # Agno Configuration
+    AGNO_MONITOR: bool = False
 
     # Other Configurations
     OPENAI_API_KEY: str
