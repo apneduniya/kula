@@ -169,14 +169,13 @@ export async function POST(req: NextRequest) {
       
       const encryptedKeypair = await encryptKeypair(agentKeypair, process.env.ENCRYPTION_KEY);
       
-      // Create associated token account instruction for the agent
       const agentATA = await getAssociatedTokenAddress(
-        new PublicKey(mint), // USDC mint
+        new PublicKey(mint),
         agentKeypair.publicKey
       );
       
       const createATAIx = createAssociatedTokenAccountInstruction(
-        new PublicKey(userAddress), // payer
+        new PublicKey(userAddress), 
         agentATA,
         agentKeypair.publicKey,
         new PublicKey(mint)
@@ -184,7 +183,6 @@ export async function POST(req: NextRequest) {
       
       agentTx.add(createATAIx);
 
-      // Store agent in database
       agentPromises.push(
         db.agent.create({
           data: {

@@ -57,5 +57,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-export const dynamic = 'force-dynamic'; // Disable caching for this route

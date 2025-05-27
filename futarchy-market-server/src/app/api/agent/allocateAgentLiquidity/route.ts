@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AnchorProvider, BN, Wallet } from "@coral-xyz/anchor";
 import { Connection, PublicKey, Transaction, TransactionInstruction, clusterApiUrl } from "@solana/web3.js";
-import { AUTOCRAT_VERSIONS, FutarchyRPCClient } from "@metadaoproject/futarchy-sdk";
 import { db } from '@/lib/db';
 import { createTransferInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
 
@@ -17,7 +16,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get all agents for this chat
     const agents = await db.agent.findMany({
       where: {
         chatId: parseInt(chatId)
@@ -31,7 +29,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Calculate amount per agent
     const amountPerAgent = Math.floor(userAllocatedUSDCAmount / agents.length);
     
     // Create a new transaction
@@ -45,14 +42,14 @@ export async function POST(req: NextRequest) {
       
       // Get the associated token account for the recipient
       const recipientATA = await getAssociatedTokenAddress(
-        new PublicKey(process.env.USDC_MINT_ADDRESS!), // USDC mint
+        new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), // USDC mint
         recipientPubkey // recipient's wallet
       );
 
       // Create transfer instruction
       const transferIx = createTransferInstruction(
         recipientATA, // from (user's ATA)
-        recipientATA, // to (agent's ATA)
+        agents[0].walletAddress,
         recipientPubkey, // owner
         amountPerAgent, // amount in base units
         [], // multisig signers (empty array if not multisig)
@@ -90,7 +87,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
-/**
- * Helper function to create a liquidity provision transaction.
- * This is a placeholder that needs to be implemented with the actual SDK method calls.
