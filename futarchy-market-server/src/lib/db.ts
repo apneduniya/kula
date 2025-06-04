@@ -7,7 +7,7 @@ declare global {
 
 // Use existing prisma instance if available in global scope (for hot reloading)
 // or create a new instance
-export const db = global.prisma || new PrismaClient({
+export const db = new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
 });
 

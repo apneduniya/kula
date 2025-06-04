@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as futarchy from "@metadaoproject/futarchy";
 import { AutocratClient } from '@metadaoproject/futarchy/v0.3';
 import { ConditionalVaultClient } from '@metadaoproject/futarchy/v0.3';
 import { AmmClient } from '@metadaoproject/futarchy/v0.4';
@@ -59,7 +58,7 @@ export async function POST(req: NextRequest) {
     const ammClient = AmmClient.createClient({ provider });
 
      const usdcMint = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
-    // Create the DAO transaction
+
     const daoKeypair = Keypair.generate();
     const createDaoTxBuilder = await autocratClient.initializeDaoIx(
       daoKeypair,
@@ -77,7 +76,7 @@ export async function POST(req: NextRequest) {
     // Create the proposal transaction
     const proposalKeypair = Keypair.generate();
     const emptyInstruction = {
-      programId: new PublicKey("11111111111111111111111111111111"), // System program
+      programId: new PublicKey("11111111111111111111111111111111"), 
       accounts: [],
       data: Buffer.from([])
     };
@@ -107,9 +106,9 @@ export async function POST(req: NextRequest) {
     const vaultKeypair = Keypair.generate();
     // Commented out until proper API signature is determined
     const initVaultTxBuilder = await vaultClient.initializeVault(
+      questionId,
       questionKeypair.publicKey,
       new PublicKey(baseMint),
-      provider.wallet.publicKey
     );
 
     // Create AMM market for the proposal
@@ -135,7 +134,7 @@ export async function POST(req: NextRequest) {
     // Combine all initialization instructions into a single transaction
     const proposalInitializationTx = new Transaction()
       .add(createDaoIx)
-      .add(createProposalIx);
+      .add(createProposalIx)
     
     // We would add the other instructions here, but due to API version mismatches
     // you'll need to consult the specific SDK version documentation
@@ -175,7 +174,7 @@ export async function POST(req: NextRequest) {
       );
       
       const createATAIx = createAssociatedTokenAccountInstruction(
-        new PublicKey(userAddress), 
+        new PublicKey(userAddress),
         agentATA,
         agentKeypair.publicKey,
         new PublicKey(mint)

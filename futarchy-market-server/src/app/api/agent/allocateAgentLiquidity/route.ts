@@ -1,6 +1,5 @@
 // providing liquidity means more USDC in the AMM for YES & NO/USDC
 import { NextRequest, NextResponse } from 'next/server';
-import { AnchorProvider, BN, Wallet } from "@coral-xyz/anchor";
 import { Connection, PublicKey, Transaction, TransactionInstruction, clusterApiUrl } from "@solana/web3.js";
 import { db } from '@/lib/db';
 import { createTransferInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
